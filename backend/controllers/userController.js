@@ -62,6 +62,4 @@ const allUser=async(req,res)=>{
     }
 }
 
-
-
 export {adduserName,edituserName,deleteuserName,allUser}
