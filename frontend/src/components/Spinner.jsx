@@ -39,62 +39,18 @@ const Spinner = ({ users, onClaim, isSpinning, setIsSpinning }) => {
     setIsSpinning(true);
     setShowResult(false);
     
-    // Add vibration effect to arrow during spinning
-    const arrow = document.querySelector('.spinner-arrow');
-    if (arrow) {
-      gsap.to(arrow, {
-        x: "+=2",
-        duration: 0.1,
-        yoyo: true,
-        repeat: -1,
-        ease: "power2.inOut"
-      });
-    }
-    
-    // Add initial excitement animation
-    gsap.to(spinnerRef.current, {
-      scale: 1.05,
-      duration: 0.2,
-      yoyo: true,
-      repeat: 1,
-      ease: "power2.inOut"
-    });
-    
     // Generate random rotation (multiple full spins + random final position)
-    const minSpins = 8;
-    const maxSpins = 12;
+    const minSpins = 5;
+    const maxSpins = 8;
     const spins = minSpins + Math.random() * (maxSpins - minSpins);
     const randomFinalAngle = Math.random() * 360;
     const totalRotation = (spins * 360) + randomFinalAngle;
     
-    // Create a timeline for complex animation
-    const tl = gsap.timeline();
-    
-    // Add blur effect during fast spinning
+    // Simple, clean animation with natural slowdown
     gsap.to(spinnerRef.current, {
-      filter: "blur(2px) brightness(1.2)",
-      duration: 0.5,
-      ease: "power2.in"
-    });
-    
-    // First phase: Fast acceleration
-    tl.to(spinnerRef.current, {
-      rotation: totalRotation * 0.3,
-      duration: 0.8,
-      ease: "power2.in"
-    })
-    // Second phase: Maintain speed with maximum blur
-    .to(spinnerRef.current, {
-      rotation: totalRotation * 0.8,
-      duration: 2,
-      ease: "none"
-    })
-    // Final phase: Gradual deceleration with blur removal
-    .to(spinnerRef.current, {
       rotation: totalRotation,
-      filter: "blur(0px) brightness(1)",
-      duration: 2.5,
-      ease: "power4.out",
+      duration: 5,
+      ease: "sine.out", // Smoother, more natural deceleration
       onComplete: async () => {
         // Get the actual final rotation from GSAP
         const currentRotation = gsap.getProperty(spinnerRef.current, "rotation");
@@ -124,19 +80,12 @@ const Spinner = ({ users, onClaim, isSpinning, setIsSpinning }) => {
         setShowResult(true);
         setIsSpinning(false);
         
-        // Stop arrow vibration
-        const arrow = document.querySelector('.spinner-arrow');
-        if (arrow) {
-          gsap.killTweensOf(arrow);
-          gsap.set(arrow, { x: 0 });
-        }
-        
-        // Add celebration animation when result appears
+        // Simple fade-in for results
         gsap.from(".result-display", {
-          scale: 0,
-          rotation: 180,
-          duration: 0.6,
-          ease: "back.out(1.7)"
+          opacity: 0,
+          y: 20,
+          duration: 0.5,
+          ease: "power2.out"
         });
         
         // Call the claim API
@@ -152,20 +101,20 @@ const Spinner = ({ users, onClaim, isSpinning, setIsSpinning }) => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white rounded-xl shadow-lg p-8">
+      <div className="text-center">
         <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
            Spin & Win Game
         </h2>
         
         {/* User Selection */}
-        <div className="mb-8">
+        <div className="mb-8 max-w-md mx-auto">
           <label className="block text-lg font-semibold text-gray-700 mb-3">
             Select a User:
           </label>
           <select
             value={selectedUser}
             onChange={(e) => setSelectedUser(e.target.value)}
-            className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none text-lg"
+            className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none text-lg bg-white"
             disabled={isSpinning}
           >
             <option value="">Choose a user...</option>
@@ -183,11 +132,10 @@ const Spinner = ({ users, onClaim, isSpinning, setIsSpinning }) => {
             {/* SVG Spinner Wheel */}
             <div
               ref={spinnerRef}
-              className={`${
-                isSpinning ? 'spinner-glow' : ''
-              }`}
               style={{ 
-                filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.3))'
+                filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.2))',
+                transform: 'translateZ(0)',
+                willChange: 'transform'
               }}
             >
               <svg width="320" height="320" viewBox="0 0 320 320" className="rounded-full">
@@ -278,10 +226,10 @@ const Spinner = ({ users, onClaim, isSpinning, setIsSpinning }) => {
             </div>
             
             {/* Pointer - pointing down into the wheel */}
-            <div className="spinner-arrow absolute top-0 left-1/2 transform -translate-x-1/2 translate-y-2 z-20">
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 z-20">
               <div 
-                className="w-0 h-0 border-l-6 border-r-6 border-t-12 border-l-transparent border-r-transparent border-t-red-600"
-                style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}
+                className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[20px] border-l-transparent border-r-transparent border-t-red-600"
+                style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.5))' }}
               ></div>
             </div>
           </div>
@@ -330,7 +278,7 @@ const Spinner = ({ users, onClaim, isSpinning, setIsSpinning }) => {
 
         {/* Result Display */}
         {showResult && (
-          <div className="result-display text-center p-6 bg-gradient-to-r from-green-100 to-blue-100 rounded-lg border-2 border-green-300">
+          <div className="result-display text-center p-6 bg-gradient-to-r from-green-100 to-blue-100 rounded-lg border-2 border-green-300 max-w-md mx-auto">
             <h3 className="text-2xl font-bold text-green-800 mb-2">
               🎉 Congratulations!
             </h3>
