@@ -14,20 +14,35 @@ export const UserProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshFlag, setRefreshFlag] = useState(0);
+  const [totalPoints, setTotalPoints] = useState(0);
 
   // Function to refresh the user list
   const refreshUsers = () => {
     setRefreshFlag(prev => prev + 1);
   };
+  
+  // Function to update total points
+  const updateTotalPoints = (points) => {
+    setTotalPoints(points);
+  };
 
-  // Fetch all users
+  // Fetch all users - this useEffect will run whenever refreshFlag changes
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
         const res = await getAllUser();
         console.log("Context Users data:", res.data);
-        setUsers(res.data.users || []);
+        const fetchedUsers = res.data.users || [];
+        setUsers(fetchedUsers);
+        
+        // Set initial total points if we have users but no points yet
+        if (fetchedUsers.length > 0 && totalPoints === 0) {
+          // Use the first user's points as default if available
+          const firstUserPoints = fetchedUsers[0]?.totalPoints || 0;
+          setTotalPoints(firstUserPoints);
+        }
+        
         setError(null);
       } catch (error) {
         console.error("Error fetching users in context:", error);
@@ -39,14 +54,16 @@ export const UserProvider = ({ children }) => {
     };
 
     fetchUsers();
-  }, [refreshFlag]);
+  }, [refreshFlag, totalPoints]);
 
   // The value that will be provided to consumers of this context
   const value = {
     users,
     loading,
     error,
-    refreshUsers
+    refreshUsers,
+    totalPoints,
+    updateTotalPoints
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
