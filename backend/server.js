@@ -20,7 +20,31 @@ app.use('/api/leaderboard',leaderboardRouter)
 
 // testing connection of server
 app.get('/',(req,res)=>{
-    res.send('working')
+    res.json({
+        message: 'Leaderboard Task Backend API is working!',
+        availableEndpoints: {
+            users: {
+                'GET /api/user/alluser': 'Get all users',
+                'POST /api/user/add': 'Add new user (Body: {name})',
+                'PUT /api/user/edit/:userId': 'Edit user (Body: {new_name})',
+                'DELETE /api/user/delete/:userId': 'Delete user'
+            },
+            claims: {
+                'POST /api/claim/:userId': 'Claim points (Body: {points: 1-10})',
+                'GET /api/claim/history/:userId': 'Get user claim history'
+            },
+            leaderboard: {
+                'GET /api/leaderboard': 'Get leaderboard (sorted by highest points)'
+            }
+        },
+        taskFeatures: {
+            userManagement: ' Add/Edit/Delete users',
+            randomPoints: ' Claim 1-10 random points',
+            claimsHistory: ' Track all claim history',
+            leaderboard: ' Dynamic rankings with bubble sort',
+            database: ' MongoDB with proper collections'
+        }
+    });
 })
 
 app.listen(port,()=>console.log(`server started on ${port}`))
