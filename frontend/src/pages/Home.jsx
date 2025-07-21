@@ -76,9 +76,15 @@ const Home = () => {
             setSelectedUserId(val);
             setClaimed(false);
             setError('');
+            setSpunPoints(null); // Reset spinner when user changes
             updateSelectedUserPoints(val);
           }}
         />
+        {selectedUserId && (
+          <p className="text-center text-sm text-gray-600 mt-2">
+            👤 Selected User: <strong>{users.find(u => u._id === selectedUserId)?.name}</strong>
+          </p>
+        )}
       </div>
 
       {/* Spinner */}
@@ -113,7 +119,7 @@ const Home = () => {
       {/* Overall Total Points Display */}
       <div className="mt-8 text-center">
         <div className="inline-block px-6 py-3 bg-blue-100 text-blue-800 rounded-full font-bold text-xl">
-          🏆 Total Points: {totalPoints || 0}
+          🏆 Total Points: {selectedUserId ? (totalPoints || 0) : 0}
         </div>
       </div>
     </div>
